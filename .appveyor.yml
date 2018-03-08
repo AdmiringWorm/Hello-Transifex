@@ -17,11 +17,12 @@ environment:
   TRANSIFEX_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
   TRANSLATION_DIR: 'translations'
+  APPVEYOR_CACHE_ENTRY_ZIP_ARGS: '-t7z -m0=lzma -mx=9'
 install:
 - pwsh: if (!(Test-Path "$env:TRANSLATION_DIR")) { mkdir "$env:TRANSLATION_DIR" }
 - cmd: cinst transifex-client --ignore-dependencies
 - sh:  |
-    sudo apt install python-pip
+    sudo apt install python-pip -y
     sudo pip install transifex-client
 cache:
 - '%TRANSLATION_DIR%'
@@ -31,8 +32,7 @@ build_script:
     cp "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
     .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic -Configuration $env:CONFIGURATION
     cp "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
-- cmd: 7x a translations.zip "%TRANSLATION_DIR%\*.resx" # This is just so we can see what files we have cached
-- sh: tar cvpjf translations.tar.bz2 "$TRANSLATION_DIR/*.resx"
+- 7z a translations.zip "%TRANSLATION_DIR%\*.resx" # This is just so we can see what files we have cached
 test: off
 artifacts:
 - path: '**/*.zip'
