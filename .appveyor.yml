@@ -7,7 +7,7 @@ image:
 - Ubuntu
 configuration: Release
 environment:
-  TRANSIFEX_TOKEN:
+  TRANSIFEX_API_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
   TRANSLATION_DIR: 'translations'
   APPVEYOR_CACHE_ENTRY_ZIP_ARGS: '-t7z -m0=lzma -mx=9'
