@@ -31,7 +31,7 @@ build_script:
 - pwsh: Copy-Item "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
 
 - cmd: powershell -command "pushd $env:APPVEYOR_BUILD_FOLDER ; .\build.ps1 -Target 'Create-ZipFile' -Verbosity Diagnostic -Configuration $env:CONFIGURATION"
-- sh: bash ./build.sh -target 'Create-ZipFile' -Verbosity Diagnostic -Configuration $Configuration
+- sh: bash ./build.sh --target 'Create-ZipFile' --verbosity Diagnostic --configuration $Configuration
 
 - pwsh: Copy-Item "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
 - cmd: 7z a translations.7z "%TRANSLATION_DIR%\*.resx" %APPVEYOR_CACHE_ENTRY_ZIP_ARGS%
