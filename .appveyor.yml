@@ -9,6 +9,7 @@ init:
     $encoding = New-Object System.Text.UTF8Encoding($false)
     $text = "[https://www.transifex.com]`r`nhostname = https://www.transifex.com`r`npassword = $env:TRANSIFEX_TOKEN`r`nusername = api"
     [System.IO.File]::WriteAllText("$env:USERPROFILE\.transifexrc", $text, $encoding)
+    if (!(Test-Path "$env:TRANSLATION_DIR")) { mkdir "$env:TRANSLATION_DIR" }
 environment:
   TRANSIFEX_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
