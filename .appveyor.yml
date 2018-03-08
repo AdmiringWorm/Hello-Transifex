@@ -2,22 +2,21 @@ version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
 skip_branch_with_pr: true
+image:
+- Visual Studio 2017
+- Ubuntu
 configuration: Release
-
 init:
 - pwsh: |
     $encoding = New-Object System.Text.UTF8Encoding($false)
     $text = "[https://www.transifex.com]`r`nhostname = https://www.transifex.com`r`npassword = $env:TRANSIFEX_TOKEN`r`nusername = api"
-    [System.IO.File]::WriteAllText("$env:USERPROFILE\.transifexrc", $text, $encoding)
+    $path = [System.IO.Path]::Combine("$env:USERPROFILE\.transifexrc")
+    [System.IO.File]::WriteAllText($path, $text, $encoding)
     if (!(Test-Path "$env:TRANSLATION_DIR")) { mkdir "$env:TRANSLATION_DIR" }
 environment:
   TRANSIFEX_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
-  matrix:
-  - TRANSLATION_DIR: C:\translations
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  - TRANSLATION_DIR: $HOME/translations
-    APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+  TRANSLATION_DIR: '%HOME%/translations'
 install:
 - cmd: cinst transifex-client --ignore-dependencies
 - sh:  pip install transifex-client
