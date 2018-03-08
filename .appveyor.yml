@@ -1,7 +1,9 @@
-version: {build}
+version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
+skip_branch_with_pr: true
 configuration: Release
+
 init:
 - pwsh: |
     $encoding = New-Object System.Text.UTF8Encoding($false)
@@ -24,7 +26,7 @@ cache:
 build_script:
 - pwsh: |
     cp "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
-    .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic
+    .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic -Configuration $env:CONFIGURATION
     cp "$env:APPVEYOR_BUILD_FOLDER/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
     Compress-Archive -Path "$env:APPVEYOR_BUILD_FOLDER/*.resx" -CompressionLevel Optimal -DestinationPath translation-cache.zip
 test: off
