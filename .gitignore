@@ -20,3 +20,4 @@ tools/**
 [Rr]esources.*.resx
 
 *.zip
+BuildArtifacts/

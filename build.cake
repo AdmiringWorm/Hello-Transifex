@@ -1,80 +1,29 @@
-#addin "nuget:?package=Cake.Transifex&version=0.2.0"
+#load "nuget:https://www.myget.org/F/cake-contrib/api/v2?package=Cake.Recipe&prerelease"
 
-var configuration = Argument("configuration", "Release");
-var target        = Argument("target", "Default");
+Environment.SetVariableNames();
 
-Task("Clean")
-  .Does(() =>
-{
-    DotNetBuild("./Hello-Transifex.sln", (conf) => conf.SetConfiguration(configuration).WithTarget("Clean"));
+BuildParameters.SetParameters(
+    context: Context,
+    buildSystem: BuildSystem,
+    sourceDirectoryPath: "./src",
+    title: "Hello-Transifex",
+    repositoryOwner: "AdmiringWorm",
+    repositoryName: "Hello-Transifex",
+    solutionFilePath: "./Hello-Transifex.sln"
+);
+
+Task("Create-ZipArchive")
+    .IsDependentOn("Test")
+    .Does(() => {
+        var path = BuildParameters.Paths.Directories.PublishedApplications + "/Hello_Transifex";
+        var outputPathDirectory = BuildParameters.Paths.Directories.Packages.Combine("Archives");
+        var outputPath = outputPathDirectory.CombineWithFilePath("Hello-Transifex-bin.zip");
+        EnsureDirectoryExists(outputPathDirectory);
+        Zip(path, outputPath);
 });
 
-// Download all transifex Translations
-// Probably should have a condition to only
-// run on appveyor, and on certain branches
-// or if the .transifexrc file exists in
-// The user profile directory
-Task("Download-Translations")
-  .Does(() =>
-{
-    TransifexPull(new TransifexPullSettings
-    {
-        All = true,
-        MinimumPercentage = 60,
-        Mode = TransifexMode.OnlyReviewed
-    });
-});
+BuildParameters.Tasks.PackageTask.IsDependentOn("Create-ZipArchive");
 
-Task("Upload-Translation-Source")
-// Basic criteria to only upload only translation source if target is called directly, or we are on the develop branch and running on appveyor
-  .WithCriteria(() => target == "Upload-Translation-Source" ||
-                (BuildSystem.AppVeyor.IsRunningOnAppVeyor && BuildSystem.AppVeyor.Environment.Repository.Branch == "develop"))
-  .Does(() =>
-{
-    TransifexPush(new TransifexPushSettings
-    {
-        UploadSourceFiles = true,
-        UploadTranslations = false
-    });
-});
+BuildParameters.PrintParameters(Context);
 
-Task("Translation-Status")
-  .IsDependentOn("Download-Translations")
-  .Does(() =>
-{
-  TransifexStatus();
-});
-
-// This task can be used if you need to
-// push out the source translation file
-// to transifex (since transifex only auto-updates once per day)
-Task("Upload-Translations")
-  .Does(() =>
-{
-    TransifexPush(new TransifexPushSettings
-    {
-        UploadSourceFiles = false,
-        UploadTranslations = true
-    });
-});
-
-Task("Build")
-  .IsDependentOn("Clean")
-  .IsDependentOn("Upload-Translation-Source")
-  .IsDependentOn("Translation-Status")
-  .Does(() =>
-{
-    DotNetBuild("./Hello-Transifex.sln", (conf) => conf.SetConfiguration(configuration));
-});
-
-Task("Create-ZipFile")
-  .IsDependentOn("Build")
-  .Does(() =>
-{
-    Zip("./src/Hello-Transifex/bin/" + configuration, "./Hello-Transifex-bin.zip");
-});
-
-Task("Default")
-    .IsDependentOn("Build");
-
-RunTarget(target);
+Build.Run();

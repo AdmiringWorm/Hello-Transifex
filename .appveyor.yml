@@ -6,13 +6,6 @@ image:
 - Visual Studio 2017
 - Ubuntu
 configuration: Release
-init:
-- sh: export USERPROFILE=$HOME
-- pwsh: |
-    $encoding = New-Object System.Text.UTF8Encoding($false)
-    $text = "[https://www.transifex.com]`r`nhostname = https://www.transifex.com`r`npassword = $env:TRANSIFEX_TOKEN`r`nusername = api"
-    $path = [System.IO.Path]::Combine("$env:USERPROFILE", ".transifexrc")
-    [System.IO.File]::WriteAllText($path, $text, $encoding)
 environment:
   TRANSIFEX_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
