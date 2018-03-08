@@ -8,6 +8,7 @@ image:
 configuration: Release
 init:
 - pwsh: |
+    $env:TRANSLATION_DIR = "$env:TEMP/translations"
     $encoding = New-Object System.Text.UTF8Encoding($false)
     $text = "[https://www.transifex.com]`r`nhostname = https://www.transifex.com`r`npassword = $env:TRANSIFEX_TOKEN`r`nusername = api"
     $path = [System.IO.Path]::Combine("$env:USERPROFILE\.transifexrc")
@@ -16,7 +17,6 @@ init:
 environment:
   TRANSIFEX_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
-  TRANSLATION_DIR: '$env:TEMP/translations'
 install:
 - cmd: cinst transifex-client --ignore-dependencies
 - sh:  pip install transifex-client
