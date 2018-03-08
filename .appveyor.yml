@@ -35,7 +35,7 @@ build_script:
 
 - pwsh: Copy-Item "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
 - cmd: 7z a translations.7z "%TRANSLATION_DIR%\*.resx" %APPVEYOR_CACHE_ENTRY_ZIP_ARGS%
-- sh: 7za translations.7z "$TRANSLATION_DIR/*.resx" $APPVEYOR_CACHE_ENTRY_ZIP_ARGS
+- sh: 7z a translations.7z "$TRANSLATION_DIR/*.resx" $APPVEYOR_CACHE_ENTRY_ZIP_ARGS
 test: off
 artifacts:
 - path: '**/*.zip'
