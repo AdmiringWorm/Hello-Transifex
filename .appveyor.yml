@@ -28,10 +28,12 @@ cache:
 - '%TRANSLATION_DIR%'
 - 'tools -> tools/packages.config'
 build_script:
-- pwsh: |
-    Copy-Item "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
-    .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic -Configuration $env:Configuration
-    Copy-Item "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
+- pwsh: Copy-Item "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
+
+- cmd: powershell -command "pushd $env:APPVEYOR_BUILD_FOLDER ; .\build.ps1 -Target 'Create-ZipFile' -Verbosity Diagnostic -Configuration $env:CONFIGURATION"
+- sh: sh ./build.sh -target 'Create-ZipFile' -Verbosity Diagnostic -Configuration $Configuration
+
+- pwsh: Copy-Item "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
 - cmd: 7z a translations.7z "%TRANSLATION_DIR%\*.resx" %APPVEYOR_CACHE_ENTRY_ZIP_ARGS%
 - sh: 7za translations.7z "$TRANSLATION_DIR/*.resx" $APPVEYOR_CACHE_ENTRY_ZIP_ARGS
 test: off
