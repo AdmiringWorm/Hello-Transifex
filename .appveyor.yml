@@ -7,9 +7,8 @@ image:
 - Ubuntu
 configuration: Release
 init:
-- pwsh: |
-    Get-ChildItem Env:\
-    exit 2
+# Workaround for linux since USERPROFILE isn't defined
+- sh: export USERPROFILE=$HOME
 - pwsh: |
     $env:TRANSLATION_DIR = "$env:USERPROFILE/translations"
     $encoding = New-Object System.Text.UTF8Encoding($false)
