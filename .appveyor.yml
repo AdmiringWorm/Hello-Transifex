@@ -8,7 +8,10 @@ image:
 configuration: Release
 init:
 - pwsh: |
-    $env:TRANSLATION_DIR = "$env:TMP/translations"
+    Get-ChildItem Env:\
+    exit 2
+- pwsh: |
+    $env:TRANSLATION_DIR = "$env:USERPROFILE/translations"
     $encoding = New-Object System.Text.UTF8Encoding($false)
     $text = "[https://www.transifex.com]`r`nhostname = https://www.transifex.com`r`npassword = $env:TRANSIFEX_TOKEN`r`nusername = api"
     $path = [System.IO.Path]::Combine("$env:USERPROFILE\.transifexrc")
@@ -28,7 +31,7 @@ build_script:
     cp "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
     .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic -Configuration $env:CONFIGURATION
     cp "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
-    Compress-Archive -Path "$env:APPVEYOR_BUILD_FOLDER/*.resx" -CompressionLevel Optimal -DestinationPath translation-cache.zip
+    Compress-Archive -Path "$env:APPVEYOR_BUILD_FOLDER/*.resx" -CompressionLevel Optimal -DestinationPath "$env:APPVEYOR_BUILD_FOLDER/translation-cache.zip"
 test: off
 artifacts:
 - path: '**/*.zip'
