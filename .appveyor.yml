@@ -1,27 +1,32 @@
-version: 1.0.{build}
+version: {build}
 pull_requests:
   do_not_increment_build_number: true
-environment:
-  TRANSIFEX_TOKEN:
-    secure: G7OCUFTUfOC89yjju3g64LeF3aTqCL5wJdQ+Y2Wa+/TXHUFjdD+SACbwZcIujuBJ
-  TRANSLATION_DIR: 'C:\translations'
+configuration: Release
 init:
-- ps: |
+- pwsh: |
     $encoding = New-Object System.Text.UTF8Encoding($false)
     $text = "[https://www.transifex.com]`r`nhostname = https://www.transifex.com`r`npassword = $env:TRANSIFEX_TOKEN`r`nusername = api"
     [System.IO.File]::WriteAllText("$env:USERPROFILE\.transifexrc", $text, $encoding)
-
-    if (!(Test-Path $env:TRANSLATION_DIR)) { mkdir $env:TRANSLATION_DIR }
+environment:
+  TRANSIFEX_TOKEN:
+    secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
+  matrix:
+  - TRANSLATION_DIR: C:\translations
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  - TRANSLATION_DIR: $HOME/translations
+    APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
 install:
-- cmd: cinst transifex-client --version 0.12.4
+- cmd: cinst transifex-client --ignore-dependencies
+- sh:  pip install transifex-client
+cache:
+- '%TRANSLATION_DIR%'
+- 'tools -> tools/packages.config'
 build_script:
-- ps: cp "$env:TRANSLATION_DIR\*.resx" "src/Hello-Transifex/Properties/" -Force
-- ps: .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic
-- ps: cp "src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR\" -Force -Exclude 'Resources.resx'
-- cmd: 7z a translation-cache.zip "%TRANSLATION_DIR%\*.resx" # This is just so we can see what files we have cached
+- pwsh: |
+    cp "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
+    .\build.ps1 -Target "Create-ZipFile" -Verbosity Diagnostic
+    cp "$env:APPVEYOR_BUILD_FOLDER/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
+    Compress-Archive -Path "$env:APPVEYOR_BUILD_FOLDER/*.resx" -CompressionLevel Optimal -DestinationPath translation-cache.zip
 test: off
 artifacts:
 - path: '**/*.zip'
-cache:
-  - '%TRANSLATION_DIR%'
-  - 'tools -> tools/packages.config'
