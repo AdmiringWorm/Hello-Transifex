@@ -16,7 +16,7 @@ init:
 environment:
   TRANSIFEX_TOKEN:
     secure: bsNgsw7B/HOGMSp7RidtPLru9aI8LAndBI1/TMPC7RcC897hXAoIyYJup6abXR/S
-  TRANSLATION_DIR: '%HOME%/translations'
+  TRANSLATION_DIR: %HOME%/translations
 install:
 - cmd: cinst transifex-client --ignore-dependencies
 - sh:  pip install transifex-client
