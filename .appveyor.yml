@@ -25,7 +25,7 @@ build_script:
 
 #- cmd: powershell -command "pushd $env:APPVEYOR_BUILD_FOLDER ; .\build.ps1 -Target 'AppVeyor' -Verbosity Diagnostic -Configuration $env:CONFIGURATION"
 #- sh: bash ./build.sh --target='AppVeyor' --verbosity=Diagnostic --configuration=$Configuration
-- pwsh: .\build.ps1 -Target 'AppVeyor' -Verbosity Diagnostic -Configuration $env:Configuration -CakeVersion 0.25.0
+- pwsh: .\build.ps1 -Target 'AppVeyor' -Verbosity Diagnostic -Configuration $env:Configuration -CakeVersion 0.25.0 -Verbose
 
 - pwsh: Copy-Item "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
 - cmd: 7z a translations.7z "%TRANSLATION_DIR%\*.resx" %APPVEYOR_CACHE_ENTRY_ZIP_ARGS%
