@@ -33,6 +33,10 @@ function GetProxyEnabledWebClient {
     return $wc
 }
 
+if (!$PSScriptRoot) {
+    $PSScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+}
+
 $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
 $CAKE_EXE_DIR = ""
 $CAKE_URL = "https://www.nuget.org/api/v2/package/Cake/$($CakeVersion)"
