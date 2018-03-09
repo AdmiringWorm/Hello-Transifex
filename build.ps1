@@ -52,7 +52,7 @@ if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
     New-Item -Path $TOOLS_DIR -Type Directory | Out-Null
 }
 
-if (!(Test-Path $CAKE_EXE)) {
+if (!(Test-Path $CAKE_EXE_DIR)) {
     $tmpDownloadFile = Join-Path "$TOOLS_DIR" "Cake.nupkg"
     Write-Verbose -Message "Downloading Cake package..."
     try {
