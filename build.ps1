@@ -60,7 +60,7 @@ if (!(Test-Path $CAKE_EXE)) {
     }
 
     Write-Verbose "Extracting Cake package..."
-    Expand-Archive -Path $tmpDownloadDir -DestinationPath $CAKE_EXE_DIR
+    Expand-Archive -Path $tmpDownloadFile -DestinationPath $CAKE_EXE_DIR
     Remove-Item $tmpDownloadFile
 }
 
