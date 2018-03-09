@@ -1,4 +1,5 @@
 #load "nuget:https://www.myget.org/F/cake-contrib/api/v2?package=Cake.Recipe&prerelease"
+#tool "nuget:?package=nuget.commandline&version=4.5.1"
 
 Environment.SetVariableNames();
 
