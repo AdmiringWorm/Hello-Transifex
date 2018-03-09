@@ -77,7 +77,7 @@ if ($ShowDescription) { $cakeArguments += "-showdescription" }
 if ($DryRun) { $cakeArguments += "-dryrun" }
 if ($Experimental) { $cakeArguments += "-experimental" }
 if ($Mono) { $cakeArguments += "-mono" }
-$cakeArguments += $ScriptArgs
+if ($ScriptArgs) { $cakeArguments += $ScriptArgs }
 
 # Start Cake
 Write-Host "Running build script..."
