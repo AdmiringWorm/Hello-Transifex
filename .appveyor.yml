@@ -3,7 +3,7 @@ pull_requests:
   do_not_increment_build_number: true
 skip_branch_with_pr: true
 image:
-- Visual Studio 2017
+#- Visual Studio 2017
 - Ubuntu
 configuration: Release
 environment:
@@ -23,8 +23,9 @@ cache:
 build_script:
 - pwsh: Copy-Item "$env:TRANSLATION_DIR/*.resx" "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/" -Force
 
-- cmd: powershell -command "pushd $env:APPVEYOR_BUILD_FOLDER ; .\build.ps1 -Target 'AppVeyor' -Verbosity Diagnostic -Configuration $env:CONFIGURATION"
-- sh: bash ./build.sh --target='AppVeyor' --verbosity=Diagnostic --configuration=$Configuration
+#- cmd: powershell -command "pushd $env:APPVEYOR_BUILD_FOLDER ; .\build.ps1 -Target 'AppVeyor' -Verbosity Diagnostic -Configuration $env:CONFIGURATION"
+#- sh: bash ./build.sh --target='AppVeyor' --verbosity=Diagnostic --configuration=$Configuration
+- pwsh: .\build.ps1 -Target 'AppVeyor' -Verbosity Diagnostic -Configuration $env:Configuration
 
 - pwsh: Copy-Item "$env:APPVEYOR_BUILD_FOLDER/src/Hello-Transifex/Properties/*.resx" "$env:TRANSLATION_DIR/" -Force -Exclude "Resources.resx"
 - cmd: 7z a translations.7z "%TRANSLATION_DIR%\*.resx" %APPVEYOR_CACHE_ENTRY_ZIP_ARGS%
