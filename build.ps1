@@ -50,17 +50,18 @@ if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
 }
 
 if (!(Test-Path $CAKE_EXE)) {
-    $tmpDownloadDir = "$env:TEMP/Cake.nupkg"
+    $tmpDownloadFile = Join-Path "$TOOLS_DIR" "Cake.nupkg"
     Write-Verbose -Message "Downloading Cake package..."
     try {
         $wc = GetProxyEnabledWebClient
-        $wc.DownloadFile($CAKE_URL, $tmpDownloadDir)
+        $wc.DownloadFile($CAKE_URL, $tmpDownloadFile)
     } catch {
         throw "Could not download Cake package...`n`nException:$_"
     }
 
     Write-Verbose "Extracting Cake package..."
-    Expand-Archive -Path $tmpDownloadDir -DestinationPath $CAKE_EXE_DIR   
+    Expand-Archive -Path $tmpDownloadDir -DestinationPath $CAKE_EXE_DIR
+    Remove-Item $tmpDownloadFile
 }
 
 $cakeArguments = @("$Script")
