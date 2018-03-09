@@ -56,7 +56,7 @@ if (!(Test-Path $CAKE_EXE)) {
         $wc = GetProxyEnabledWebClient
         $wc.DownloadFile($CAKE_URL, $tmpDownloadDir)
     } catch {
-        throw "Could not download Cake package..."
+        throw "Could not download Cake package...`n`nException:$_"
     }
 
     Write-Verbose "Extracting Cake package..."
