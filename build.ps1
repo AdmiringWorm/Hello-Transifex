@@ -46,8 +46,6 @@ if ($CakeVersion) {
 } else {
     $CAKE_EXE_DIR = Join-Path "$TOOLS_DIR" "Cake"
 }
-$CAKE_EXE = Get-ChildItem -LiteralPath $CAKE_EXE_DIR -Filter "Cake.exe" -Recurse | Select-Object -first 1 -expand FullName
-if (!$CAKE_EXE) { throw "Unable to find the Cake.exe executable" }
 
 if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
     Write-Verbose -Message "Creating tools directory..."
@@ -68,6 +66,8 @@ if (!(Test-Path $CAKE_EXE)) {
     Expand-Archive -Path $tmpDownloadFile -DestinationPath $CAKE_EXE_DIR
     Remove-Item $tmpDownloadFile
 }
+$CAKE_EXE = Get-ChildItem -LiteralPath $CAKE_EXE_DIR -Filter "Cake.exe" -Recurse | Select-Object -first 1 -expand FullName
+if (!$CAKE_EXE) { throw "Unable to find the Cake.exe executable" }
 
 $cakeArguments = @("$Script")
 if ($Target) { $cakeArguments += "-target=$Target" }
