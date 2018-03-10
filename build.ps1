@@ -1,3 +1,50 @@
+<#
+
+.SYNOPSIS
+This is a Powershell script to bootstrap a Cake build.
+
+.DESCRIPTION
+This Powershell script will download Cake with using the specified version (0.25.0 by default),
+and execute your Cake build script with the parameters you provide.
+
+.PARAMETER Script
+The build script to execute.
+
+.PARAMETER Target
+The build script target to run.
+
+.PARAMETER Configuration
+The build configuration to use.
+
+.PARAMETER Verbosity
+Specifies the amount of information to be displayed.
+
+.PARAMETER ShowDescription
+Shows description about tasks.
+
+.PARAMETER DryRun
+Performs a dry run.
+
+.PARAMETER Experimental
+Uses the nightly builds of the Roslyn script engine.
+
+.PARAMETER Mono
+Uses the Mono Compiler rather than the Roslyn script engine.
+
+.PARAMETER CakeVersion
+The Cake version to run the build scripts with.
+
+.PARAMETER CakeNetCore
+Use the .NET Core version of cake.
+
+.PARAMETER ScriptArgs
+Remaining arguments are added here.
+
+.LINK
+https://cakebuild.net
+
+#>
+
 [CmdletBinding()]
 param(
     [string]$Script = "build.cake",
@@ -10,7 +57,8 @@ param(
     [switch]$DryRun,
     [switch]$Experimental,
     [switch]$Mono,
-    [version]$CakeVersion = $null,
+    [version]$CakeVersion = '0.25.0',
+    [switch]$UseNetCore,
     [Parameter(Position = 0, Mandatory = $false, ValueFromRemainingArguments=$true)]
     [string[]]$ScriptArgs
 )
@@ -19,9 +67,13 @@ param(
 if (!(Test-Path Function:\Expand-Archive)) {
     function Expand-Archive() {
         param([string]$Path, [string]$DestinationPath)
+		if (!(Test-Path $DestinationPath)) { New-Item -Type Directory -Path $DestinationPath }
 
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($Path, $DestinationPath)
+        $shellApplication = New-Object -com shell.application
+        $zipPackage = $shellApplication.namespace($Path)
+        $destinationFolder = $shellApplication.namespace($DestinationPath)
+
+        $destinationFolder.CopyHere($zipPackage.Items(), 16)
     }
 }
 
@@ -39,12 +91,18 @@ if (!$PSScriptRoot) {
 
 $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
 $CAKE_EXE_DIR = ""
-$CAKE_URL = "https://www.nuget.org/api/v2/package/Cake/$($CakeVersion)"
+if ($UseNetCore) {
+    $CAKE_URL = "https://www.nuget.org/api/v2/package/Cake.CoreCLR/$($CakeVersion)"
+    $CAKE_DIR_NAME = "Cake.CoreCLR"
+} else {
+    $CAKE_URL = "https://www.nuget.org/api/v2/package/Cake/$($CakeVersion)"
+    $CAKE_DIR_NAME = "Cake"
+}
 
 if ($CakeVersion) {
-    $CAKE_EXE_DIR = Join-Path "$TOOLS_DIR" "Cake.$($CakeVersion.ToString())"
+    $CAKE_EXE_DIR = Join-Path "$TOOLS_DIR" "$CAKE_DIR_NAME.$($CakeVersion.ToString())"
 } else {
-    $CAKE_EXE_DIR = Join-Path "$TOOLS_DIR" "Cake"
+    $CAKE_EXE_DIR = Join-Path "$TOOLS_DIR" "$CAKE_DIR_NAME"
 }
 
 if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
@@ -53,7 +111,9 @@ if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
 }
 
 if (!(Test-Path $CAKE_EXE_DIR)) {
-    $tmpDownloadFile = Join-Path "$TOOLS_DIR" "Cake.nupkg"
+    # We download and saves it as a normal zip file, in cases
+    # were we need to extract it using com.
+    $tmpDownloadFile = Join-Path "$TOOLS_DIR" "$CAKE_DIR_NAME.zip"
     Write-Verbose -Message "Downloading Cake package..."
     try {
         $wc = GetProxyEnabledWebClient
@@ -64,10 +124,15 @@ if (!(Test-Path $CAKE_EXE_DIR)) {
 
     Write-Verbose "Extracting Cake package..."
     Expand-Archive -Path $tmpDownloadFile -DestinationPath $CAKE_EXE_DIR
-    Remove-Item $tmpDownloadFile
+    Remove-Item -Recurse -Force $tmpDownloadFile,"$CAKE_EXE_DIR/_rels","$CAKE_EXE_DIR/``[Content_Types``].xml","$CAKE_EXE_DIR/package"
 }
-$CAKE_EXE = Get-ChildItem -LiteralPath $CAKE_EXE_DIR -Filter "Cake.exe" -Recurse | Select-Object -first 1 -expand FullName
-if (!$CAKE_EXE) { throw "Unable to find the Cake.exe executable" }
+if ($UseNetCore) {
+    $CAKE_EXE = Get-ChildItem -LiteralPath $CAKE_EXE_DIR -Filter "Cake.dll" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+    if (!$CAKE_EXE) { throw "Unable to find the Cake.dll library" }
+} else {
+    $CAKE_EXE = Get-ChildItem -LiteralPath $CAKE_EXE_DIR -Filter "Cake.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+    if (!$CAKE_EXE) { throw "Unable to find the Cake.exe executable" }
+}
 
 $cakeArguments = @("$Script")
 if ($Target) { $cakeArguments += "-target=$Target" }
@@ -79,16 +144,14 @@ if ($Experimental) { $cakeArguments += "-experimental" }
 if ($Mono) { $cakeArguments += "-mono" }
 if ($ScriptArgs) { $cakeArguments += $ScriptArgs }
 
-if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT) {
-    # Start Cake
-    Write-Host "Running build script..."
-    Start-Process -FilePath $CAKE_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
-} else {
-    $cakeArguments = @($CAKE_EXE; $cakeArguments)
-    $MONO_EXE = Get-Command -Name mono | % Definition
-
-    Write-Host "Running build script..."
-    Start-Process -FilePath $MONO_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
+if ($UseNetCore) {
+    $cakeArguments = @($CAKE_EXE ; $cakeArguments)
+    $CAKE_EXE = Get-Command -Name dotnet | ForEach-Object Definition
+} elseif ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
+    $cakeArguments = @($CAKE_EXE ; $cakeArguments)
+    $CAKE_EXE = Get-Command -Name mono | ForEach-Object Definition
 }
+
+Start-Process -FilePath $CAKE_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
 
 exit $LASTEXITCODE
