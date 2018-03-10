@@ -153,6 +153,6 @@ if ($UseNetCore) {
 }
 
 Write-Host "Running build script..."
-& $CAKE_EXE_DIR $cakeArguments
+& $CAKE_EXE $cakeArguments
 
 exit $LASTEXITCODE
