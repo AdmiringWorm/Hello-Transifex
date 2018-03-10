@@ -67,9 +67,12 @@ param(
 if (!(Test-Path Function:\Expand-Archive)) {
     function Expand-Archive() {
         param([string]$Path, [string]$DestinationPath)
-		if (!(Test-Path $DestinationPath)) { New-Item -Type Directory -Path $DestinationPath }
+        if (!(Test-Path $DestinationPath)) { New-Item -Type Directory -Path $DestinationPath }
 
-        if ($PSVersionTable -and $PSVersionTable.CLRVersion -and ($PSVersionTable.CLRVersion -ge [version]'4.0.30319.17001')) {
+        $isPowershellCore = $PSVersionTable -and $PSVersionTable.PSEdition -eq 'Core'
+        $haveNet45 = $PSVersionTable -and $PSVersionTable.CLRVersion -and ($PSVersionTable.CLRVersion -ge [version]'4.0.30319.17001')
+
+        if ($isPowershellCore -or $haveNet45) {
             Add-Type -AssemblyName System.IO.Compression.FileSystem
             [System.IO.Compression.ZipFile]::ExtractToDirectory($Path, $DestinationPath)
         } else {
