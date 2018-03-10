@@ -79,8 +79,16 @@ if ($Experimental) { $cakeArguments += "-experimental" }
 if ($Mono) { $cakeArguments += "-mono" }
 if ($ScriptArgs) { $cakeArguments += $ScriptArgs }
 
-# Start Cake
-Write-Host "Running build script..."
-Start-Process -FilePath $CAKE_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
+if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT) {
+    # Start Cake
+    Write-Host "Running build script..."
+    Start-Process -FilePath $CAKE_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
+} else {
+    $cakeArguments = @($CAKE_EXE; $cakeArguments)
+    $MONO_EXE = Get-Command -Name mono | % Definition
+
+    Write-Host "Running build script..."
+    Start-Process -FilePath $MONO_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
+}
 
 exit $LASTEXITCODE
