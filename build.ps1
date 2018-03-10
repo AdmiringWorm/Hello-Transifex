@@ -152,6 +152,7 @@ if ($UseNetCore) {
     $CAKE_EXE = Get-Command -Name mono | ForEach-Object Definition
 }
 
-Start-Process -FilePath $CAKE_EXE -ArgumentList $cakeArguments -Wait -NoNewWindow
+Write-Host "Running build script..."
+& $CAKE_EXE_DIR $cakeArguments
 
 exit $LASTEXITCODE
