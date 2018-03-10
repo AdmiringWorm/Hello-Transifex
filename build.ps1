@@ -69,11 +69,15 @@ if (!(Test-Path Function:\Expand-Archive)) {
         param([string]$Path, [string]$DestinationPath)
 		if (!(Test-Path $DestinationPath)) { New-Item -Type Directory -Path $DestinationPath }
 
-        $shellApplication = New-Object -com shell.application
-        $zipPackage = $shellApplication.namespace($Path)
-        $destinationFolder = $shellApplication.namespace($DestinationPath)
-
-        $destinationFolder.CopyHere($zipPackage.Items(), 16)
+        if ($PSVersionTable -and $PSVersionTable.CLRVersion -and ($PSVersionTable.CLRVersion -ge [version]'4.0.30319.17001')) {
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($Path, $DestinationPath)
+        } else {
+            $shellApplication = New-Object -com shell.application
+            $zipPackage = $shellApplication.namespace($Path)
+            $destinationFolder = $shellApplication.namespace($DestinationPath)
+            $destinationFolder.CopyHere($zipPackage.Items(), 16)
+        }
     }
 }
 
