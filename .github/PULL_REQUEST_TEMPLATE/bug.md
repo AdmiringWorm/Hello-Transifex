@@ -1,3 +1,8 @@
+---
+name: Fixing a bug
+about: Open a Pull Request to fix a bug
+---
+
 <!--- Provide a general summary of your changes in the Title above, please prefix the title with BUG: -->
 
 ## Description

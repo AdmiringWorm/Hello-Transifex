@@ -1,3 +1,8 @@
+---
+name: Create a new Feature
+about: Open a Pull Request for a new Feature or to enhance the program
+---
+
 <!--- Provide a general summary of your changes in the Title above, please prefix the tile with FEATURE: -->
 
 ## Description

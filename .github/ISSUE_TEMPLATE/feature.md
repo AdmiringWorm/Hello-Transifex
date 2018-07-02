@@ -1,3 +1,8 @@
+---
+name: Enhancement / Feature Request
+about: What can we do to improve the program for you?
+---
+
 <!--- Provide a general summary of the issue in the Title above -->
 
 ## Detailed Description
